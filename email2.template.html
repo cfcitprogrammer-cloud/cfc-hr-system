@@ -1,0 +1,49 @@
+<!-- ReferenceAnsweredEmailTemplate.html -->
+<div
+  style="
+    font-family: &quot;Roboto&quot;, sans-serif;
+    background-color: #f7f7f7;
+    padding: 20px;
+  "
+>
+  <div
+    style="
+      max-width: 600px;
+      margin: auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      padding: 20px;
+    "
+  >
+    <!-- Header -->
+    <div style="text-align: center; padding-bottom: 20px">
+      <img
+        src="https://jdudykmsleefptjgostd.supabase.co/storage/v1/object/public/assets/cfc-logo-removebg.png"
+        width="100"
+      />
+    </div>
+
+    <!-- Greeting -->
+    <p>Hello <?= hr_name ?>,</p>
+
+    <!-- Body -->
+    <p>
+      Good news! The reference check request you submitted for
+      <strong><?= employee_name ?></strong> has been completed by
+      <strong><?= reference_name ?></strong>.
+    </p>
+
+    <p>Sincerely,</p>
+
+    <!-- Footer -->
+    <div style="text-align: left; padding-top: 10px">
+      <img
+        src="https://jdudykmsleefptjgostd.supabase.co/storage/v1/object/public/assets/cfc-logo-removebg.png"
+        width="100"
+        alt="cfc"
+      /><br />
+      <strong><?= company ?></strong><br />
+    </div>
+  </div>
+</div>
