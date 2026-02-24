@@ -1,21 +1,42 @@
+"use client";
+
+import { ReactNode, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { AppSidebar } from "@/components/custom/sidebar/app-sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ReactNode } from "react";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 export default function Page({ children }: { children: ReactNode }) {
+  const { user, status } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Only run when status is not loading
+    if (status === "loading") return;
+
+    if (status === "unauthenticated") {
+      router.replace("/a/signin");
+    } else if (!user?.rawAppMeta?.approved) {
+      toast.error("Account needs approval. Please contact administrator.");
+      router.replace("/a/signin");
+    }
+  }, [status, user, router]);
+
+  // Loading state
+  if (status === "loading") return <div>Loading...</div>;
+
+  // Render nothing while redirecting
+  if (status === "unauthenticated") return null;
+
+  if (!user?.rawAppMeta?.approved) return null;
+
   return (
     <SidebarProvider>
       <AppSidebar />

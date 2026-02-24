@@ -43,12 +43,17 @@ export function SignupForm({
       const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          data: {
+            name: data.name,
+          },
+        },
       });
 
       if (error) {
         toast.error(error.message);
       } else {
-        router.replace("/a/login?newUser=true");
+        router.replace("/a/signin?newUser=true");
       }
     } catch (err: any) {
       toast.error(err);
@@ -71,6 +76,20 @@ export function SignupForm({
                   Enter your email below to create your account
                 </p>
               </div>
+
+              <Field>
+                <FieldLabel htmlFor="name">Name</FieldLabel>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  {...register("name")}
+                  required
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-xs">{errors.name.message}</p>
+                )}
+              </Field>
 
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>

@@ -26,14 +26,10 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks/use-auth";
 
 // This is sample data.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Referece Check",
@@ -43,11 +39,11 @@ const data = {
       items: [
         {
           title: "Dashboard",
-          url: "#",
+          url: "/d/reference-check/home",
         },
         {
           title: "Reference Check",
-          url: "#",
+          url: "/d/reference-check/1",
         },
       ],
     },
@@ -55,6 +51,10 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user } = useAuth();
+
+  console.log(user);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -65,7 +65,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser
+          user={{
+            name: user?.rawUserMeta?.name!,
+            email: user?.email!,
+            avatar: user?.email?.charAt(0)!.toUpperCase()!,
+          }}
+        />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

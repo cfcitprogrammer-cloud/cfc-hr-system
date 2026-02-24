@@ -17,12 +17,13 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export function SigninForm({
   className,
@@ -30,6 +31,7 @@ export function SigninForm({
 }: React.ComponentProps<"div">) {
   const searchParams = useSearchParams();
   const newUser = searchParams.get("newUser");
+  const navigate = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,17 +46,15 @@ export function SigninForm({
       });
 
       if (error) {
-        console.error("Login error:", error.message);
-        alert(`Login failed: ${error.message}`);
+        toast.error(`Login failed: ${error.message}`);
         return;
       }
 
       // Redirect or show success message
-      console.log("Login successful:", data.user);
-      alert("Login successful!");
+      toast.success("Login successful!");
+      navigate.replace("/d/reference-check/1");
     } catch (err) {
-      console.error("Unexpected error:", err);
-      alert("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
     }
   }
 

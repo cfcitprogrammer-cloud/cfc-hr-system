@@ -10,4 +10,5 @@ export type ReferenceCheck = {
   created_at: string; // Date the request was created (ISO string)
   user_id: string; // ID of the HR or user creating the request
   sid: string; // Session or unique secondary identifier
+  status: string;
 };
