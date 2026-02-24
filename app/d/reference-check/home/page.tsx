@@ -55,7 +55,8 @@ export default function ReferenceCheckHome() {
       const { data, error } = await supabase
         .from("refchecks")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(5);
 
       if (error) {
         toast.error(error.message);
@@ -117,13 +118,8 @@ export default function ReferenceCheckHome() {
 
       {/* Recent Reference Checks */}
       <section>
-        <div className="flex justify-between items-center gap-2 mb-4">
-          <Field orientation="horizontal">
-            <Input type="search" placeholder="Search..." className="w-60" />
-            <Button>
-              <Search />
-            </Button>
-          </Field>
+        <div className="mb-6">
+          <h1 className="text-lg font-semibold">Recent Reference Checks</h1>
         </div>
 
         <Table>
@@ -133,7 +129,6 @@ export default function ReferenceCheckHome() {
               <TableHead>Receiver Name</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Expires On</TableHead>
-              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -189,11 +184,6 @@ export default function ReferenceCheckHome() {
                       {ref.expires_on
                         ? new Date(ref.expires_on).toLocaleDateString()
                         : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon-xs">
-                        View
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
