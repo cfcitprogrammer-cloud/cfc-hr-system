@@ -53,7 +53,7 @@ export default function ReferenceCheckHome() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from("refchecks")
+        .from("refchecks_with_user")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(5);

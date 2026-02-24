@@ -87,7 +87,7 @@ export default function IssueRefCheckForm({ setOpen }: Props) {
             company: data.company,
             expires_on: expiresOn.toISOString(),
             // include UUID or ID from Supabase if needed
-            id: insertedData?.[0]?.id,
+            sid: insertedData?.[0]?.id,
           }),
         );
 
