@@ -9,17 +9,20 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ReferenceCheck } from "@/lib/types/refcheck";
+import EditRefCheckForm from "../forms/edit-ref-check.form";
 
 type EditRefCheckDialogProps = {
   isOpen: boolean;
   onClose: () => void;
-  refCheck: ReferenceCheck | null;
+  refCheck: ReferenceCheck;
+  refresh: () => void;
 };
 
 export const EditRefCheckDialog = ({
   isOpen,
   onClose,
   refCheck,
+  refresh,
 }: EditRefCheckDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -27,17 +30,11 @@ export const EditRefCheckDialog = ({
         <DialogHeader>
           <DialogTitle>Edit Reference Check</DialogTitle>
         </DialogHeader>
-        <div className="mt-4">
-          {/* Input fields for editing the reference check */}
-          <Input
-            defaultValue={refCheck?.receiver_name}
-            placeholder="Receiver Name"
-          />
-        </div>
-        <Button onClick={onClose}>Save</Button>
-        <Button variant="secondary" onClick={onClose}>
-          Cancel
-        </Button>
+        <EditRefCheckForm
+          setOpen={onClose}
+          refCheck={refCheck}
+          refresh={refresh}
+        />
       </DialogContent>
     </Dialog>
   );

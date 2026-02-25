@@ -76,9 +76,7 @@ function SigninForm() {
     <Card>
       <CardHeader className="text-center">
         <CardTitle className="text-xl">Welcome back</CardTitle>
-        <CardDescription>
-          Login with your Apple or Google account
-        </CardDescription>
+        <CardDescription>Login with your existing account</CardDescription>
 
         {newUser && (
           <Alert className="bg-green-700 text-white border-green-400">

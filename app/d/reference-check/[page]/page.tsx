@@ -189,7 +189,9 @@ export default function ReferenceCheckPage() {
             </Button>
           </Field>
 
-          <RefCheckDialog />
+          <RefCheckDialog
+            refresh={() => fetchReferenceChecks(Number(page), searchQuery)}
+          />
         </div>
 
         <Table>
@@ -331,7 +333,8 @@ export default function ReferenceCheckPage() {
         <EditRefCheckDialog
           isOpen={isEditDialogOpen}
           onClose={() => setEditDialogOpen(false)}
-          refCheck={selectedRefCheck}
+          refCheck={selectedRefCheck!}
+          refresh={() => fetchReferenceChecks(Number(page), searchQuery)}
         />
         <DeleteRefCheckDialog
           isOpen={isDeleteDialogOpen}

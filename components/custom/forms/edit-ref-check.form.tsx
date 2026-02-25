@@ -22,15 +22,22 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/lib/supabase";
 import axios from "axios";
+import { ReferenceCheck } from "@/lib/types/refcheck";
+import { useRouter } from "next/navigation";
 
 interface Props {
   setOpen: (open: boolean) => void;
+  refCheck: ReferenceCheck;
   refresh: () => void;
 }
 
 const GAS_URL = process.env.NEXT_PUBLIC_GAS_URL!;
 
-export default function IssueRefCheckForm({ setOpen, refresh }: Props) {
+export default function EditRefCheckForm({
+  setOpen,
+  refCheck,
+  refresh,
+}: Props) {
   const {
     control,
     handleSubmit,
@@ -39,12 +46,12 @@ export default function IssueRefCheckForm({ setOpen, refresh }: Props) {
   } = useForm<IssueRefCheckFormValues>({
     resolver: zodResolver(issueRefCheckSchema),
     defaultValues: {
-      title: "maam",
-      receiverName: "",
-      receiverEmail: "",
-      employeeName: "",
-      position: "",
-      company: "Centennial Food Corporation",
+      title: refCheck.title,
+      receiverName: refCheck.receiver_name,
+      receiverEmail: refCheck.receiver_email,
+      employeeName: refCheck.employee_name,
+      position: refCheck.position,
+      company: refCheck.company,
     },
   });
 
@@ -56,18 +63,17 @@ export default function IssueRefCheckForm({ setOpen, refresh }: Props) {
 
       const { error, data: insertedData } = await supabase
         .from("refchecks")
-        .insert([
-          {
-            title: data.title,
-            receiver_name: data.receiverName,
-            receiver_email: data.receiverEmail,
-            employee_name: data.employeeName,
-            position: data.position,
-            company: data.company,
-            expires_on: expiresOn.toISOString(),
-          },
-        ])
-        .select(); // select to get the inserted row
+        .update({
+          title: data.title,
+          receiver_name: data.receiverName,
+          receiver_email: data.receiverEmail,
+          employee_name: data.employeeName,
+          position: data.position,
+          company: data.company,
+          expires_on: expiresOn.toISOString(),
+        })
+        .eq("id", refCheck.id)
+        .select();
 
       if (error) {
         toast.error(error.message);
@@ -88,7 +94,7 @@ export default function IssueRefCheckForm({ setOpen, refresh }: Props) {
             company: data.company,
             expires_on: expiresOn.toISOString(),
             // include UUID or ID from Supabase if needed
-            sid: insertedData?.[0]?.sid,
+            sid: insertedData?.[0]?.id,
           }),
         );
 
@@ -99,7 +105,7 @@ export default function IssueRefCheckForm({ setOpen, refresh }: Props) {
         );
       }
 
-      toast.success("Reference check issued successfully");
+      toast.success("Reference check updated and issued successfully");
 
       reset();
       refresh();
@@ -208,7 +214,7 @@ export default function IssueRefCheckForm({ setOpen, refresh }: Props) {
 
       <DialogFooter>
         <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? <Spinner /> : "Submit"}
+          {isSubmitting ? <Spinner /> : "Update and Resend"}
         </Button>
       </DialogFooter>
     </form>

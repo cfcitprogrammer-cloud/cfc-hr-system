@@ -13,7 +13,7 @@ import {
 import { Plus } from "lucide-react";
 import IssueRefCheckForm from "../forms/issue-ref-check.form";
 
-export default function RefCheckDialog() {
+export default function RefCheckDialog({ refresh }: { refresh: () => void }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -32,7 +32,7 @@ export default function RefCheckDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <IssueRefCheckForm setOpen={setOpen} />
+        <IssueRefCheckForm setOpen={setOpen} refresh={refresh} />
       </DialogContent>
     </Dialog>
   );

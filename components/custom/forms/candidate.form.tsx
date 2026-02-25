@@ -10,7 +10,10 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import axios from "axios";
 import { ReferenceCheck } from "@/lib/types/refcheck";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuth } from "@/hooks/use-auth";
 
 interface CandidateFormValues {
   candidateName: string;
@@ -32,6 +35,12 @@ interface CandidateFormValues {
   notes?: string;
 }
 
+export type ReferenceCheckExtended = ReferenceCheck & {
+  raw_user_meta_data: {
+    email: string;
+  };
+};
+
 const HR_RESPONSIBILITIES = [
   "Recruitment and Staffing",
   "Employee Onboarding",
@@ -42,9 +51,10 @@ const HR_RESPONSIBILITIES = [
 export default function CandidateForm({
   refCheck,
 }: {
-  refCheck: ReferenceCheck | null;
+  refCheck: ReferenceCheckExtended | null;
 }) {
   const [step, setStep] = useState(0);
+  const navigate = useRouter();
 
   const form = useForm<CandidateFormValues>({
     defaultValues: {
@@ -125,8 +135,6 @@ export default function CandidateForm({
 
       if (error) throw error;
 
-      alert("Reference check submitted successfully!");
-
       await axios.post(
         process.env.NEXT_PUBLIC_GAS_URL!,
         JSON.stringify({
@@ -153,19 +161,28 @@ export default function CandidateForm({
           receiver_name: refCheck?.receiver_name,
           receiver_email: refCheck?.receiver_email,
           company: refCheck?.company,
+          email: refCheck?.raw_user_meta_data!.email,
         }),
       );
 
       form.reset();
-      setStep(0);
+
+      navigate.replace("/p/response/ty");
     } catch (err: any) {
-      alert("Error submitting form: " + err.message);
+      toast.error("Error submitting form: " + err.message);
     }
   };
 
   const steps = [
     // step
     <div className="text-center">
+      <img
+        src="https://jdudykmsleefptjgostd.supabase.co/storage/v1/object/public/assets/cfc-logo-removebg.png"
+        alt="cfc-logo"
+        width={120}
+        height={120}
+        className="mx-auto mb-4"
+      />
       <h1 className="text-lg font-semibold">
         Reference Check for {refCheck?.employee_name}
       </h1>
@@ -359,7 +376,8 @@ export default function CandidateForm({
       name="promotion"
       control={control}
       render={({ field }) => (
-        <div className="flex items-center space-x-2">
+        <div className="space-y-2">
+          <p>Did the candidate receive any promotion?</p>
           <Button
             variant={field.value ? "default" : "outline"}
             onClick={() => field.onChange(true)}
@@ -374,7 +392,6 @@ export default function CandidateForm({
           >
             No
           </Button>
-          <span>Did the candidate receive any promotion?</span>
         </div>
       )}
     />,
@@ -385,7 +402,8 @@ export default function CandidateForm({
       name="salaryDisclosed"
       control={control}
       render={({ field }) => (
-        <div className="flex items-center space-x-2">
+        <div className="space-y-2">
+          <p>Can you disclose the candidate's salary?</p>
           <Button
             variant={field.value ? "default" : "outline"}
             onClick={() => field.onChange(true)}
@@ -400,7 +418,6 @@ export default function CandidateForm({
           >
             No
           </Button>
-          <span>Can you disclose the candidate's salary?</span>
         </div>
       )}
     />,
@@ -432,22 +449,24 @@ export default function CandidateForm({
       name="disciplinaryAction"
       control={control}
       render={({ field }) => (
-        <div className="flex items-center space-x-2">
-          <Button
-            variant={field.value ? "default" : "outline"}
-            onClick={() => field.onChange(true)}
-            type="button"
-          >
-            Yes
-          </Button>
-          <Button
-            variant={!field.value ? "default" : "outline"}
-            onClick={() => field.onChange(false)}
-            type="button"
-          >
-            No
-          </Button>
-          <span>Was the candidate subject to disciplinary action?</span>
+        <div className="space-y-2">
+          <p>Was the candidate subject to disciplinary action?</p>
+          <div>
+            <Button
+              variant={field.value ? "default" : "outline"}
+              onClick={() => field.onChange(true)}
+              type="button"
+            >
+              Yes
+            </Button>
+            <Button
+              variant={!field.value ? "default" : "outline"}
+              onClick={() => field.onChange(false)}
+              type="button"
+            >
+              No
+            </Button>
+          </div>
         </div>
       )}
     />,
@@ -479,7 +498,8 @@ export default function CandidateForm({
       name="rehire"
       control={control}
       render={({ field }) => (
-        <div className="flex items-center space-x-2">
+        <div className="space-y-2">
+          <p>Would your organization rehire this person again?</p>
           <Button
             variant={field.value ? "default" : "outline"}
             onClick={() => field.onChange(true)}
@@ -494,7 +514,6 @@ export default function CandidateForm({
           >
             No
           </Button>
-          <span>Would your organization rehire this person again?</span>
         </div>
       )}
     />,
@@ -627,7 +646,7 @@ export default function CandidateForm({
       <div className="flex justify-between mt-6">
         <Button
           onClick={() => setStep((s) => Math.max(s - 1, 0))}
-          disabled={step === 0}
+          disabled={step === 0 || form.formState.isSubmitting}
           variant="outline"
           type="button"
         >
@@ -635,8 +654,12 @@ export default function CandidateForm({
         </Button>
 
         {step + 1 === steps.length ? (
-          <Button type="button" onClick={handleSubmit(onSubmit)}>
-            Submit
+          <Button
+            type="button"
+            onClick={handleSubmit(onSubmit)}
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? <Spinner /> : "Submit"}
           </Button>
         ) : (
           <Button type="button" onClick={handleNext}>

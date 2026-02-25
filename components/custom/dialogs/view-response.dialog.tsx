@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Dialog,
   DialogContent,
@@ -10,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { ReferenceCheck } from "@/lib/types/refcheck";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import axios from "axios";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
 
 type ViewResponseDialogProps = {
   isOpen: boolean;
@@ -24,9 +29,12 @@ export const ViewResponseDialog = ({
 }: ViewResponseDialogProps) => {
   const [responseData, setResponseData] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (refCheck) {
+    if (refCheck && isOpen) {
       findResponse();
     }
   }, [refCheck, isOpen]);
@@ -35,7 +43,6 @@ export const ViewResponseDialog = ({
     if (!refCheck?.sid) return;
 
     setLoading(true);
-
     try {
       const { data, error } = await supabase
         .from("candidate_ref_checks")
@@ -43,23 +50,62 @@ export const ViewResponseDialog = ({
         .eq("refchecks_sid", refCheck.sid)
         .limit(1);
 
-      console.log(refCheck.sid);
-      console.log(data);
-
       if (error) {
-        console.error("Error fetching response:", error.message);
+        toast.error("Error fetching response");
       } else {
         setResponseData(data[0]);
       }
-    } catch (error) {
-      console.error("Error:", error);
+    } catch (error: any) {
+      toast.error("Error:", error);
     } finally {
       setLoading(false);
     }
   }
 
-  // Helper function to display "Not Available" if the value is null or empty
   const displayValue = (value: any) => (value ? value : "Not Available");
+
+  async function generateReport() {
+    if (!responseData) return;
+    setGenerating(true);
+    try {
+      await axios.post(
+        process.env.NEXT_PUBLIC_GAS_URL!,
+        JSON.stringify({
+          action: "generatePdf",
+          candidate_name: responseData.candidate_name || "",
+          current_role: responseData.current_role || "",
+          organization: responseData.organization || "",
+          sss_id: responseData.sss_employer_id || "",
+          hr_responsibilities: responseData.hr_responsibilities || "",
+          candidate_role: responseData.candidate_role || "",
+          start_date: responseData.start_date || "",
+          end_date: responseData.end_date || "",
+          attendance: responseData.attendance_record || "",
+          promotion: responseData.promotion_details || "",
+          salary_disclosed: responseData.salary_disclosed || "",
+          salary_amount: responseData.salary_details || "",
+          disciplinary_action: responseData.disciplinary_actions || "",
+          disciplinary_details: responseData.disciplinary_details || "",
+          rehire: responseData.rehire_status || "",
+          rehire_reason: responseData.rehire_reason || "",
+          notes: responseData.additional_notes || "",
+          refchecks_sid: refCheck?.sid || "",
+          created_at: new Date().toISOString(),
+          receiver_name: refCheck?.receiver_name || "",
+          receiver_email: refCheck?.receiver_email || "",
+          company: refCheck?.company || "",
+          email: user?.email || "",
+        }),
+      );
+      // Optionally: show a toast or success message here
+
+      toast.success("Report generated successfully. Check your email.");
+    } catch (error) {
+      toast.error("Error generating report");
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -138,9 +184,14 @@ export const ViewResponseDialog = ({
           )}
         </div>
 
-        <div>
-          <Button className="w-full" variant={"secondary"}>
-            Generate Report
+        <div className="mt-4 space-y-2">
+          <Button
+            className="w-full"
+            variant="secondary"
+            onClick={generateReport}
+            disabled={generating || !responseData}
+          >
+            {generating ? "Generating Report..." : "Generate Report"}
           </Button>
           <Button className="w-full" onClick={onClose}>
             Close
